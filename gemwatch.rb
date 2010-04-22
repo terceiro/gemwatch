@@ -64,8 +64,12 @@ get '/' do
 end
 
 get '/:gem' do
-  @gem = WatchedGem.new(params[:gem])
-  haml :gem
+  begin
+    @gem = WatchedGem.new(params[:gem])
+    haml :gem
+  rescue RestClient::ResourceNotFound
+    not_found
+  end
 end
 
 get '/download/:tarball' do
@@ -74,6 +78,10 @@ get '/download/:tarball' do
   gem = WatchedGem.new(gemname)
   gem.download_and_convert!
   redirect gem.tarball_uri
+end
+
+not_found do
+  haml :not_found
 end
 
 __END__
@@ -92,3 +100,5 @@ __END__
 @@ gem
 %h1= 'Gem watch: %s' % @gem.name
 %a{:href => "/download/#{@gem.tarball}"}= @gem.tarball
+@@ not_found
+%h1 Sorry, couldn't find a gem with such name
