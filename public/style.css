@@ -1,8 +1,7 @@
 body {
   font-family: "LMSans10", Helvetiva, Arial, sans-serif;
   width: 760px;
-  margin: auto;
+  margin: 1em auto;
   padding: 1em;
-  border-left: 1px solid black;
-  border-right: 1px solid black;
+  border: 1px solid #ccc;
 }
