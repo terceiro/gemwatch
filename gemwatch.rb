@@ -38,7 +38,7 @@ class WatchedGem
         system "tar xf #{gem}"
         system "tar xzf data.tar.gz"
         system "zcat metadata.gz > metadata.yml"
-        system "rm -f data.tar.gz metadata.gz"
+        system "rm -f #{gem} data.tar.gz metadata.gz"
       end
       Dir.chdir(File.dirname(absolute_directory)) do
         system "tar czf #{tarball} #{directory}"
