@@ -6,8 +6,16 @@ require 'json'
 DOWNLOAD_DIR = File.join(File.dirname(__FILE__), 'tmp', 'download')
 
 class WatchedGem
-  def initialize(gemname)
-    @data = JSON.parse(RestClient.get("http://rubygems.org/api/v1/gems/#{gemname}.json").body)
+  class NotFound < Exception; end
+  def initialize(gemname, wanted_version = nil)
+    begin
+      @data = JSON.parse(RestClient.get("http://rubygems.org/api/v1/gems/#{gemname}.json").body)
+    rescue RestClient::ResourceNotFound
+      raise WatchedGem::NotFound
+    end
+    if wanted_version && wanted_version != version
+      raise WatchedGem::NotFound
+    end
   end
   def name
     @data['name']
@@ -67,7 +75,7 @@ get '/:gem' do
   begin
     @gem = WatchedGem.new(params[:gem])
     haml :gem
-  rescue RestClient::ResourceNotFound
+  rescue WatchedGem::NotFound
     not_found
   end
 end
@@ -75,12 +83,14 @@ end
 get '/download/:tarball' do
   begin
     params[:tarball] =~ /^(.+)-(.+).tar.gz$/
-      gemname = $1
-    gem = WatchedGem.new(gemname)
+    gem_name = $1
+    gem_version = $2
+
+    gem = WatchedGem.new(gem_name, gem_version)
     gem.download_and_convert!
     expires 86400000 # 1000 days, published versions are supposed to not change
     send_file gem.tarball_path
-  rescue RestClient::ResourceNotFound
+  rescue WatchedGem::NotFound
     not_found
   end
 end
@@ -96,14 +106,18 @@ __END__
     %link{:rel => "stylesheet", :type => "text/css", :href => "/style.css"}
   %body
     =yield
+    %script{:src => "http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js", :type => "text/javascript", :charset => "utf-8"}
+    %script{:src => "/gemwatch.js", :type => "text/javascript", :charset => "utf-8"}
 @@ index
 %h1 Gem watch
 %form
   Gem name:
-  %input{:type => "text", :name => "gem"}
+  %input{:type => "text", :name => "gem", :id => "gem"}
   %input{:type => "submit", :value => "Watch"}
 @@ gem
 %h1= 'Gem watch: %s' % @gem.name
 %a{:href => "/download/#{@gem.tarball}"}= @gem.tarball
 @@ not_found
-%h1 Sorry, couldn't find a gem with such name
+%h1 Not Found
+%p Sorry, we couldn't find a gem with such name (or version)
+%a{:href => "/"} Try again
