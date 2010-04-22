@@ -1,0 +1,35 @@
+--- 
+dependencies: 
+  haml: 
+    group: 
+    - :default
+    version: = 2.2.22
+  json: 
+    group: 
+    - :default
+    version: = 1.1.9
+  sinatra: 
+    group: 
+    - :default
+    version: = 1.0
+  rest-client: 
+    group: 
+    - :default
+    version: = 1.4.2
+specs: 
+- json: 
+    version: 1.1.9
+- rack: 
+    version: 1.1.0
+- mime-types: 
+    version: "1.16"
+- rest-client: 
+    version: 1.4.2
+- haml: 
+    version: 2.2.22
+- sinatra: 
+    version: "1.0"
+hash: 9cd78b2b730d31014e4b37c20b39fbbb257d5416
+sources: 
+- Rubygems: 
+    uri: http://rubygems.org/
