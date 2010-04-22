@@ -21,6 +21,12 @@ a, a:link, a:visited {
   color: black;
 }
 
+pre, code {
+  border: 1px solid #babdb6;
+  background: #eeeeec;
+  padding: 2px;
+}
+
 /* Not Found */
 body.not-found .wrap {
   border-color: #a40000;

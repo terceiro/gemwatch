@@ -117,9 +117,13 @@ __END__
   %input{:type => "submit", :value => "Watch"}
 @@ gem
 %h1= 'Gem watch: %s' % @gem.name
+%h2 Available downloads
 %ul
   %li
     %a{:href => "/download/#{@gem.tarball}"}= @gem.tarball
+%h2 Usage in debian/watch file
+%p Use the following in your <code>debian/watch</code> file:
+%pre= "version=3\nhttp://#{request.host_with_port}/#{@gem.name} /download/#{@gem.name}-(.*)\.tar\.gz"
 %a{:href => "/"} Try another gem
 @@ not_found
 - @body_class = 'not-found'
