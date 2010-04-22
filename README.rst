@@ -16,6 +16,27 @@ be properly warned of new upstream releases::
   version=3
   http://gemwatch.heroku.com/${gem} /download/${gem}-(.*)\.tar\.gz
 
+Gem conversion to tarball
+-------------------------
+
+A gem named ``mygem-0.1.0.gem`` is converted in a tarball with the following
+steps::
+
+  mkdir mygem-0.1.0
+  cd mygem-0.1.0
+  wget ...../mygem-0.1.0.gem
+  tar xf mygem-0.1.0.gem
+  tar xzf data.tar.gz
+  xcat metadata.gz > metadata.yml
+  rm -f mygem-0.1.0.gem data.tar.gz metadata.gz
+  cd ..
+  tar czf mygem-0.1.0.tar.gz mygem-0.1.0
+
+This way:
+
+* The tarball contains all the files the gem contains
+* The gem metadata ends up in a file named ``metadata.yml`` inside the tarball
+
 License
 -------
 
