@@ -88,7 +88,7 @@ get '/download/:tarball' do
 
     gem = WatchedGem.new(gem_name, gem_version)
     gem.download_and_convert!
-    expires 86400000 # 1000 days, published versions are supposed to not change
+    expires 86400000, :public # 1000 days, published versions are supposed to not change
     send_file gem.tarball_path
   rescue WatchedGem::NotFound
     not_found
