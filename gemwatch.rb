@@ -3,7 +3,7 @@ require 'haml'
 require 'restclient'
 require 'json'
 
-DOWNLOAD_DIR = File.join(File.dirname(__FILE__), 'public', 'tarballs')
+DOWNLOAD_DIR = File.join(File.dirname(__FILE__), 'tmp', 'download')
 
 class WatchedGem
   def initialize(gemname)
@@ -73,11 +73,16 @@ get '/:gem' do
 end
 
 get '/download/:tarball' do
-  params[:tarball] =~ /^(.+)-(.+).tar.gz$/
-  gemname = $1
-  gem = WatchedGem.new(gemname)
-  gem.download_and_convert!
-  redirect gem.tarball_uri
+  begin
+    params[:tarball] =~ /^(.+)-(.+).tar.gz$/
+      gemname = $1
+    gem = WatchedGem.new(gemname)
+    gem.download_and_convert!
+    expires 86400000 # 1000 days, published versions are supposed to not change
+    send_file gem.tarball_path
+  rescue RestClient::ResourceNotFound
+    not_found
+  end
 end
 
 not_found do
