@@ -1,7 +1,33 @@
+/* Default style */
+
 body {
   font-family: "LMSans10", Helvetiva, Arial, sans-serif;
   width: 760px;
   margin: 1em auto;
+}
+
+body .wrap {
   padding: 1em;
-  border: 1px solid #ccc;
+  border-width: 1px;
+  border-style: solid;
+}
+
+h1 {
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+}
+
+a, a:link, a:visited {
+  color: black;
+}
+
+/* Not Found */
+body.not-found .wrap {
+  border-color: #a40000;
+  background-color: #fc9999;
+}
+
+body.not-found h1 {
+  color: #a40000;
+  border-bottom-color: #a40000;
 }

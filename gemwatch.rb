@@ -104,8 +104,9 @@ __END__
 %html
   %head
     %link{:rel => "stylesheet", :type => "text/css", :href => "/style.css"}
-  %body
-    =yield
+  %body{:class => @body_class}
+    %div.wrap
+      =yield
     %script{:src => "http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js", :type => "text/javascript", :charset => "utf-8"}
     %script{:src => "/gemwatch.js", :type => "text/javascript", :charset => "utf-8"}
 @@ index
@@ -116,8 +117,12 @@ __END__
   %input{:type => "submit", :value => "Watch"}
 @@ gem
 %h1= 'Gem watch: %s' % @gem.name
-%a{:href => "/download/#{@gem.tarball}"}= @gem.tarball
+%ul
+  %li
+    %a{:href => "/download/#{@gem.tarball}"}= @gem.tarball
+%a{:href => "/"} Try another gem
 @@ not_found
+- @body_class = 'not-found'
 %h1 Not Found
 %p Sorry, we couldn't find a gem with such name (or version)
 %a{:href => "/"} Try again
