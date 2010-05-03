@@ -37,6 +37,15 @@ This way:
 * The tarball contains all the files the gem contains
 * The gem metadata ends up in a file named ``metadata.yml`` inside the tarball
 
+Running as CGI
+--------------
+
+* Create a symlink pointing to the ``cgi`` script into your ``cgi-bin`` directory. The symlink can be named as you wish.
+* Make sure gemwatch's ``public`` directory is accessible as ``/gemwatch``
+* Example:
+** ``http://mysite.com/cgi-bin/gemwatch``, where ``gemwatch`` is a symlink to gemwatch's ``cgi`` script
+** ``http://mysite.com/gemwatch`` is a symlink (or an alias) to gemwatch's ``public`` directory.
+
 License
 -------
 
