@@ -86,8 +86,17 @@ class GemWatch::Gem
     File.join(DOWNLOAD_DIR, tarball)
   end
 end
+module HostHelper
+  def host_with_port
+    if request.respond_to?(:host_with_port)
+      request.host_with_port
+    else
+      request.host + ([80,443].include?(request.port) ? '' : (':' + request.port.to_s))
+    end
+  end
+end
 
-helpers GemWatch
+helpers GemWatch, HostHelper
 
 get '/?' do
   if params[:gem]
@@ -156,7 +165,7 @@ __END__
     %a{:href => app_url("/download/#{@gem.tarball}")}= @gem.tarball
 %h2 Usage in debian/watch file
 %p Use the following in your <code>debian/watch</code> file:
-%pre= "version=3\nhttp://#{request.host_with_port}#{app_url('/'+ @gem.name)} .*/#{@gem.name}-(.*)\.tar\.gz"
+%pre= "version=3\nhttp://#{host_with_port}#{app_url('/'+ @gem.name)} .*/#{@gem.name}-(.*)\.tar\.gz"
 %a{:href => app_url("/")} Try another gem
 @@ not_found
 - @body_class = 'not-found'
