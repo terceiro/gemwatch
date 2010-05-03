@@ -21,6 +21,7 @@ end
 
 class GemWatch::Gem
   class NotFound < Exception; end
+  class CommandFailed < Exception; end
   def initialize(gemname, wanted_version = nil)
     begin
       @data = JSON.parse(RestClient.get("http://rubygems.org/api/v1/gems/#{gemname}.json").body)
@@ -43,20 +44,26 @@ class GemWatch::Gem
   def gem
     File.basename(uri)
   end
+  def run(cmd)
+    system(cmd)
+    if $? > 0
+      raise GemWatch::Gem::CommandFailed
+    end
+  end
   def download_and_convert!
     unless File.exist?(tarball_path)
-      system "rm -rf #{absolute_directory}*"
-      system "mkdir -p #{absolute_directory}"
+      FileUtils.rm_rf(absolute_directory)
+      FileUtils.mkdir_p(absolute_directory)
       Dir.chdir(absolute_directory) do
-        system "wget #{uri}"
-        system "tar xf #{gem}"
-        system "tar xzf data.tar.gz"
-        system "zcat metadata.gz > metadata.yml"
-        system "rm -f #{gem} data.tar.gz metadata.gz"
+        run "wget #{uri}"
+        run "tar xf #{gem}"
+        run "tar xzf data.tar.gz"
+        run "zcat metadata.gz > metadata.yml"
+        FileUtils.rm_f([gem, "data.tar.gz", "metadata.gz"])
       end
       Dir.chdir(File.dirname(absolute_directory)) do
-        system "tar czf #{tarball} #{directory}"
-        system "rm -rf #{directory}"
+        run "tar czf #{tarball} #{directory}"
+        FileUtils.rm_rf(directory)
       end
     end
   end
@@ -108,11 +115,17 @@ get '/download/:tarball' do
     send_file gem.tarball_path
   rescue GemWatch::Gem::NotFound
     not_found
+  rescue Exception
+    500
   end
 end
 
 not_found do
   haml :not_found
+end
+
+error 500 do
+  haml :error
 end
 
 __END__
@@ -146,3 +159,8 @@ __END__
 %h1 Not Found
 %p Sorry, we couldn't find a gem with such name (or version)
 %a{:href => app_url("/")} Try again
+@@ error
+- @body_class = 'internal-error'
+%h1 Internal error
+%p Sorry, gemwatch detected an internal error and cannot continue with your request.
+%a{:href => app_url('/')} Start over

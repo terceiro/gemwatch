@@ -29,11 +29,22 @@ pre, code {
 
 /* Not Found */
 body.not-found .wrap {
+  border-color: #555753;
+  background-color: #eeeeec;
+}
+
+body.not-found h1 {
+  color: #555753;
+  border-bottom-color: #555753;
+}
+
+/* Internal error */
+body.internal-error .wrap {
   border-color: #a40000;
   background-color: #fc9999;
 }
 
-body.not-found h1 {
+body.internal-error h1 {
   color: #a40000;
   border-bottom-color: #a40000;
 }
