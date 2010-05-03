@@ -49,8 +49,8 @@ class GemWatch::Gem
   end
   def run(cmd)
     system(cmd)
-    if $? > 0
-      raise GemWatch::Gem::CommandFailed
+    if $? && ($? >> 8) > 0
+      raise GemWatch::Gem::CommandFailed, "[#{cmd} failed!]"
     end
   end
   def download_and_convert!
@@ -127,8 +127,6 @@ get '/download/:tarball' do
     send_file gem.tarball_path
   rescue GemWatch::Gem::NotFound
     not_found
-  rescue Exception
-    500
   end
 end
 
