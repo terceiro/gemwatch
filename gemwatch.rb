@@ -41,6 +41,9 @@ class GemWatch::Gem
   def uri
     @data['gem_uri']
   end
+  def info
+    @data['info']
+  end
   def gem
     File.basename(uri)
   end
@@ -146,6 +149,7 @@ __END__
   %input{:type => "submit", :value => "Watch"}
 @@ gem
 %h1= 'Gem watch: %s' % @gem.name
+%blockquote= @gem.info
 %h2 Available downloads
 %ul
   %li
