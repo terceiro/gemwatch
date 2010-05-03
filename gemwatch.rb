@@ -5,16 +5,30 @@ require 'json'
 
 DOWNLOAD_DIR = File.join(File.dirname(__FILE__), 'tmp', 'download')
 
-class WatchedGem
+module GemWatch
+  class << self
+    attr_accessor :assets_path, :prefix
+  end
+  self.assets_path = ""
+  self.prefix = ""
+  def asset_url(url)
+    GemWatch.assets_path + url
+  end
+  def app_url(url)
+    GemWatch.prefix + url
+  end
+end
+
+class GemWatch::Gem
   class NotFound < Exception; end
   def initialize(gemname, wanted_version = nil)
     begin
       @data = JSON.parse(RestClient.get("http://rubygems.org/api/v1/gems/#{gemname}.json").body)
     rescue RestClient::ResourceNotFound
-      raise WatchedGem::NotFound
+      raise GemWatch::Gem::NotFound
     end
     if wanted_version && wanted_version != version
-      raise WatchedGem::NotFound
+      raise GemWatch::Gem::NotFound
     end
   end
   def name
@@ -63,9 +77,11 @@ class WatchedGem
   end
 end
 
-get '/' do
+helpers GemWatch
+
+get '/?' do
   if params[:gem]
-    redirect "/#{params[:gem]}"
+    redirect app_url("/#{params[:gem]}")
   else
     haml :index
   end
@@ -73,9 +89,9 @@ end
 
 get '/:gem' do
   begin
-    @gem = WatchedGem.new(params[:gem])
+    @gem = GemWatch::Gem.new(params[:gem])
     haml :gem
-  rescue WatchedGem::NotFound
+  rescue GemWatch::Gem::NotFound
     not_found
   end
 end
@@ -86,11 +102,11 @@ get '/download/:tarball' do
     gem_name = $1
     gem_version = $2
 
-    gem = WatchedGem.new(gem_name, gem_version)
+    gem = GemWatch::Gem.new(gem_name, gem_version)
     gem.download_and_convert!
     expires 86400000, :public # 1000 days, published versions are supposed to not change
     send_file gem.tarball_path
-  rescue WatchedGem::NotFound
+  rescue GemWatch::Gem::NotFound
     not_found
   end
 end
@@ -103,12 +119,12 @@ __END__
 @@ layout
 %html
   %head
-    %link{:rel => "stylesheet", :type => "text/css", :href => "/style.css"}
+    %link{:rel => "stylesheet", :type => "text/css", :href => asset_url("/style.css")}
   %body{:class => @body_class}
     %div.wrap
       =yield
     %script{:src => "http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js", :type => "text/javascript", :charset => "utf-8"}
-    %script{:src => "/gemwatch.js", :type => "text/javascript", :charset => "utf-8"}
+    %script{:src => asset_url("/gemwatch.js"), :type => "text/javascript", :charset => "utf-8"}
 @@ index
 %h1 Gem watch
 %form
@@ -120,13 +136,13 @@ __END__
 %h2 Available downloads
 %ul
   %li
-    %a{:href => "/download/#{@gem.tarball}"}= @gem.tarball
+    %a{:href => app_url("/download/#{@gem.tarball}")}= @gem.tarball
 %h2 Usage in debian/watch file
 %p Use the following in your <code>debian/watch</code> file:
-%pre= "version=3\nhttp://#{request.host_with_port}/#{@gem.name} /download/#{@gem.name}-(.*)\.tar\.gz"
-%a{:href => "/"} Try another gem
+%pre= "version=3\nhttp://#{request.host_with_port}#{app_url('/'+ @gem.name)} .*/#{@gem.name}-(.*)\.tar\.gz"
+%a{:href => app_url("/")} Try another gem
 @@ not_found
 - @body_class = 'not-found'
 %h1 Not Found
 %p Sorry, we couldn't find a gem with such name (or version)
-%a{:href => "/"} Try again
+%a{:href => app_url("/")} Try again
