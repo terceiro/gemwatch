@@ -142,6 +142,7 @@ __END__
 @@ layout
 %html
   %head
+    %title= [@title, "Gemwatch"].compact.join(' - ')
     %link{:rel => "stylesheet", :type => "text/css", :href => asset_url("/style.css")}
   %body{:class => @body_class}
     %div.wrap
@@ -155,6 +156,7 @@ __END__
   %input{:type => "text", :name => "gem", :id => "gem"}
   %input{:type => "submit", :value => "Watch"}
 @@ gem
+- @title = @gem.name
 %h1= 'Gem watch: %s' % @gem.name
 %blockquote= @gem.info
 %h2 Available downloads
@@ -166,11 +168,13 @@ __END__
 %pre= "version=3\nhttp://#{host_with_port}#{app_url('/'+ @gem.name)} .*/#{@gem.name}-(.*)\.tar\.gz"
 %a{:href => app_url("/")} Try another gem
 @@ not_found
+- @title = "Not Found"
 - @body_class = 'not-found'
 %h1 Not Found
 %p Sorry, we couldn't find a gem with such name (or version)
 %a{:href => app_url("/")} Try again
 @@ error
+- @title = 'Internal error'
 - @body_class = 'internal-error'
 %h1 Internal error
 %p Sorry, gemwatch detected an internal error and cannot continue with your request.
