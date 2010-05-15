@@ -59,8 +59,8 @@ class GemWatch::Gem
       FileUtils.mkdir_p(absolute_directory)
       Dir.chdir(absolute_directory) do
         run "wget #{uri}"
-        run "tar xf #{gem}"
-        run "tar xzf data.tar.gz"
+        run "tar xfm #{gem}"
+        run "tar xzfm data.tar.gz"
         run "zcat metadata.gz > metadata.yml"
         FileUtils.rm_f([gem, "data.tar.gz", "metadata.gz"])
       end
