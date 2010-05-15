@@ -1,0 +1,18 @@
+- @title = @gem.name
+%h1= 'Gem watch: %s' % @gem.name
+%blockquote= @gem.info
+%h2 Available downloads
+%p
+  Most recent version:
+  %a{:href => app_url("/download/#{@gem.tarball}")}= @gem.tarball
+- unless @gem.archived.empty?
+  %p
+    Archived versions:
+    %ul
+      - @gem.archived.sort.reverse.each do |filename|
+        %li
+          %a{:href => app_url("/download/#{filename}")}= filename
+%h2 Usage in debian/watch file
+%p Use the following in your <code>debian/watch</code> file:
+%pre= "version=3\nhttp://#{host_with_port}#{app_url('/'+ @gem.name)} .*/#{@gem.name}-(.*)\.tar\.gz"
+%a{:href => app_url("/")} Try another gem
