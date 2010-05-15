@@ -3,6 +3,8 @@ require 'haml'
 require 'restclient'
 require 'json'
 
+require 'open-uri'
+
 DOWNLOAD_DIR = File.join(File.dirname(__FILE__), 'tmp', 'download')
 
 module GemWatch
@@ -53,12 +55,19 @@ class GemWatch::Gem
       raise GemWatch::Gem::CommandFailed, "[#{cmd} failed!]"
     end
   end
+  def download(uri)
+    open(uri, 'rb') do |downloaded_gem|
+      File.open(gem, 'wb') do |file|
+        file.write(downloaded_gem.read)
+      end
+    end
+  end
   def download_and_convert!
     unless File.exist?(tarball_path)
       FileUtils.rm_rf(absolute_directory)
       FileUtils.mkdir_p(absolute_directory)
       Dir.chdir(absolute_directory) do
-        run "wget #{uri}"
+        download uri
         run "tar xfm #{gem}"
         run "tar xzfm data.tar.gz"
         run "zcat metadata.gz > metadata.yml"
