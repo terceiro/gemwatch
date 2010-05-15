@@ -197,7 +197,7 @@ __END__
   %p
     Archived versions:
     %ul
-      - @gem.archived.reverse.each do |filename|
+      - @gem.archived.sort.reverse.each do |filename|
         %li
           %a{:href => app_url("/download/#{filename}")}= filename
 %h2 Usage in debian/watch file
