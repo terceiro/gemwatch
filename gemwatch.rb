@@ -91,9 +91,6 @@ class GemWatch::Gem
   def tarball
     "#{directory}.tar.gz"
   end
-  def tarball_uri
-    "/#{File.basename(download_dir)}/#{tarball}"
-  end
   def tarball_path
     File.join(download_dir, tarball)
   end
