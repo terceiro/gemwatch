@@ -144,6 +144,7 @@ __END__
 @@ layout
 %html
   %head
+    %meta{"http-equiv" => "content-type", :content => "text/html;charset=UTF-8"}
     %title= [@title, "Gemwatch"].compact.join(' - ')
     %link{:rel => "stylesheet", :type => "text/css", :href => asset_url("/style.css")}
   %body{:class => @body_class}
