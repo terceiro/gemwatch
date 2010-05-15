@@ -24,13 +24,10 @@ end
 class GemWatch::Gem
   class NotFound < Exception; end
   class CommandFailed < Exception; end
-  def initialize(gemname, wanted_version = nil)
+  def initialize(gemname)
     begin
       @data = JSON.parse(RestClient.get("http://rubygems.org/api/v1/gems/#{gemname}.json").body)
     rescue RestClient::ResourceNotFound
-      raise GemWatch::Gem::NotFound
-    end
-    if wanted_version && wanted_version != version
       raise GemWatch::Gem::NotFound
     end
   end
@@ -94,6 +91,28 @@ class GemWatch::Gem
   def tarball_path
     File.join(download_dir, tarball)
   end
+  def archived
+    @archived ||= Dir.glob(File.join(download_dir, '*.tar.gz')).map { |f| File.basename(f) }
+  end
+  def archived?(tarball)
+    archived.include?(tarball)
+  end
+  def archived_path(tarball)
+    File.join(download_dir, tarball)
+  end
+  def download_for(wanted_version)
+    tarball = "#{name}-#{wanted_version}.tar.gz"
+    if archived?(tarball)
+      archived_path(tarball)
+    else
+      if wanted_version == version
+        download_and_convert!
+        tarball_path
+      else
+        raise GemWatch::Gem::NotFound
+      end
+    end
+  end
 end
 module HostHelper
   def host_with_port
@@ -133,9 +152,8 @@ get '/download/:tarball' do
     gem_name = $1
     gem_version = $2
 
-    gem = GemWatch::Gem.new(gem_name, gem_version)
-    gem.download_and_convert!
-    send_file gem.tarball_path
+    gem = GemWatch::Gem.new(gem_name)
+    send_file gem.download_for(gem_version)
   rescue GemWatch::Gem::NotFound
     not_found
   end
@@ -172,9 +190,16 @@ __END__
 %h1= 'Gem watch: %s' % @gem.name
 %blockquote= @gem.info
 %h2 Available downloads
-%ul
-  %li
-    %a{:href => app_url("/download/#{@gem.tarball}")}= @gem.tarball
+%p
+  Most recent version:
+  %a{:href => app_url("/download/#{@gem.tarball}")}= @gem.tarball
+- unless @gem.archived.empty?
+  %p
+    Archived versions:
+    %ul
+      - @gem.archived.reverse.each do |filename|
+        %li
+          %a{:href => app_url("/download/#{filename}")}= filename
 %h2 Usage in debian/watch file
 %p Use the following in your <code>debian/watch</code> file:
 %pre= "version=3\nhttp://#{host_with_port}#{app_url('/'+ @gem.name)} .*/#{@gem.name}-(.*)\.tar\.gz"
