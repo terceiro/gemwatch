@@ -99,6 +99,7 @@ end
 helpers GemWatch, HostHelper
 
 get '/?' do
+  expires 86400, :public  # 1 day
   if params[:gem]
     redirect app_url("/#{params[:gem]}")
   else
@@ -107,6 +108,7 @@ get '/?' do
 end
 
 get '/:gem' do
+  expires 14400, :public # 4 hours
   begin
     @gem = GemWatch::Gem.new(params[:gem])
     haml :gem
@@ -116,6 +118,7 @@ get '/:gem' do
 end
 
 get '/download/:tarball' do
+  expires 86400000, :public # 1000 days, published versions are supposed to not change
   begin
     params[:tarball] =~ /^(.+)-(.+).tar.gz$/
     gem_name = $1
@@ -123,7 +126,6 @@ get '/download/:tarball' do
 
     gem = GemWatch::Gem.new(gem_name, gem_version)
     gem.download_and_convert!
-    expires 86400000, :public # 1000 days, published versions are supposed to not change
     send_file gem.tarball_path
   rescue GemWatch::Gem::NotFound
     not_found
