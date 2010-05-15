@@ -5,7 +5,7 @@ require 'json'
 
 require 'open-uri'
 
-DOWNLOAD_DIR = File.join(File.dirname(__FILE__), 'tmp', 'download')
+DOWNLOAD_BASE = File.join(File.dirname(__FILE__), 'tmp', 'download')
 
 module GemWatch
   class << self
@@ -82,17 +82,20 @@ class GemWatch::Gem
   def directory
     "#{name}-#{version}"
   end
+  def download_dir
+    @download_dir ||= File.join(DOWNLOAD_BASE, name[0..0], name)
+  end
   def absolute_directory
-    File.join(DOWNLOAD_DIR, directory)
+    File.join(download_dir, directory)
   end
   def tarball
     "#{directory}.tar.gz"
   end
   def tarball_uri
-    "/#{File.basename(DOWNLOAD_DIR)}/#{tarball}"
+    "/#{File.basename(download_dir)}/#{tarball}"
   end
   def tarball_path
-    File.join(DOWNLOAD_DIR, tarball)
+    File.join(download_dir, tarball)
   end
 end
 module HostHelper
